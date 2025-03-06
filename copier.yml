@@ -1,0 +1,6 @@
+_conflict: rej
+
+# questions
+cname:
+  type: str
+  help: Desired CNAME for github pages?
