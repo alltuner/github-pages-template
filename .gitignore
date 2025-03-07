@@ -10,3 +10,6 @@ pnpm-lock.yaml
 
 # for uv
 uv.lock
+
+docs/statics/css/bundle.css
+docs/statics/js/bundle.js
