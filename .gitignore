@@ -13,3 +13,5 @@ uv.lock
 
 docs/statics/css/bundle.css
 docs/statics/js/bundle.js
+
+.env
