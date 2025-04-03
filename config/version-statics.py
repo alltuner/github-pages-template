@@ -1,20 +1,26 @@
+import random
+import string
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import bs4
 import typer
 
 app = typer.Typer()
 
-VALUES_TO_VERSION = {
-    "/statics/css/bundle.css",
-    "/statics/js/bundle.js",
-}
-
 VERSIONING = [
     {"tag": "script", "attr": "src", "base": "/statics/js/bundle.js"},
     {"tag": "link", "attr": "href", "base": "/statics/css/bundle.css"},
 ]
+
+
+def generate_random_string(length=10):
+    """Generates a random string of specified length."""
+    characters = string.ascii_letters + string.digits
+    return "".join(random.choice(characters) for i in range(length))
+
+
+random_string = generate_random_string()
 
 
 def version_html_file(file: Path, version: str) -> None:
@@ -52,17 +58,22 @@ def version_static(
         ),
     ],
     version: Annotated[
-        str,
+        Optional[str],
         typer.Argument(
             help="The version to assign to the static files",
         ),
     ],
 ):
+    if version is None:
+        version = generate_random_string()
+
     print(f"Versioning static files in {directory} with version {version}.")
 
     for html_file in directory.rglob("*.html"):
         print(f"Versioning {html_file}")
         version_html_file(html_file, version)
+
+    print("Versioning completed.")
 
 
 if __name__ == "__main__":

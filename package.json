@@ -11,9 +11,9 @@
   "scripts": {
     "build:css": "tailwindcss -i config/tailwind.config.css --minify -o docs/statics/css/bundle.css",
     "build:js": "esbuild config/esbuild.config.js --bundle --minify --outfile=docs/statics/js/bundle.js",
-    "build": "npm-run-all build:*",
+    "build": "npm-run-all build:* version-statics",
     "purge-cf": "uv run --with python-cloudflare config/purge-cf.py",
-    "version-statics": "uv run --with beautifulsoup4,typer config/version-statics.py",
+    "version-statics": "uv run --with beautifulsoup4,typer config/version-statics.py docs",
     "watch:css": "tailwindcss -i config/tailwind.config.css -o docs/statics/css/bundle.css --watch",
     "watch:js": "esbuild config/esbuild.config.js --bundle --outfile=docs/statics/js/bundle.js --watch",
     "serve": "cd docs && uv run python -m http.server 8000",
