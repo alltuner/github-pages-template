@@ -11,7 +11,7 @@
   "scripts": {
     "build:css": "tailwindcss -i config/tailwind.config.css --minify -o docs/statics/css/bundle.css",
     "build:js": "esbuild config/esbuild.config.js --bundle --minify --outfile=docs/statics/js/bundle.js",
-    "build": "npm-run-all build:* version-statics",
+    "build": "npm-run-all build:*",
     "purge-cf": "uv run --with python-cloudflare config/purge-cf.py",
     "version-statics": "uv run --with beautifulsoup4,typer config/version-statics.py",
     "watch:css": "tailwindcss -i config/tailwind.config.css -o docs/statics/css/bundle.css --watch",
