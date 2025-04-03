@@ -62,7 +62,7 @@ def version_static(
         typer.Argument(
             help="The version to assign to the static files",
         ),
-    ],
+    ] = None,
 ):
     if version is None:
         version = generate_random_string()
