@@ -42,7 +42,7 @@ def version_html_file(file: Path, version: str) -> None:
                 tag[versioning["attr"]] = f"{versioning['base']}?v={version}"
 
     # Write the modified HTML back to the file
-    file.write_text(str(soup.prettify()))
+    file.write_text(str(soup))
 
 
 @app.command()
