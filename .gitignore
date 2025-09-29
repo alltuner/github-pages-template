@@ -1,17 +1,4 @@
 .DS_Store
-
 node_modules/
-
-# for npm
-package-lock.json
-
-# for bun
-bun.lock
-
-# for uv
-uv.lock
-
-docs/statics/css/bundle.css
-docs/statics/js/bundle.js
-
 .env
+bun.lock
