@@ -5,8 +5,8 @@ node_modules/
 # for npm
 package-lock.json
 
-# for pnpm
-pnpm-lock.yaml
+# for bun
+bun.lock
 
 # for uv
 uv.lock
