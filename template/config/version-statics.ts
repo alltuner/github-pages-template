@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { readdirSync, readFileSync, writeFileSync } from "fs";
+import { readdirSync, readFileSync, writeFileSync, unlinkSync, existsSync } from "fs";
 import { join } from "path";
 
 interface BundleFiles {
@@ -8,17 +8,35 @@ interface BundleFiles {
   css: string | null;
 }
 
+function cleanupOldBundles(docsDir: string): void {
+  const jsDir = join(docsDir, "statics", "js");
+  const cssDir = join(docsDir, "statics", "css");
+
+  const oldFiles = [
+    join(jsDir, "bundle.js"),
+    join(jsDir, "bundle.js.map"),
+    join(cssDir, "bundle.css"),
+  ];
+
+  for (const file of oldFiles) {
+    if (existsSync(file)) {
+      unlinkSync(file);
+      console.log(`🗑️  Removed old bundle: ${file}`);
+    }
+  }
+}
+
 function findBundleFiles(docsDir: string): BundleFiles {
   const jsDir = join(docsDir, "statics", "js");
   const cssDir = join(docsDir, "statics", "css");
-  
+
   const jsFiles = readdirSync(jsDir).filter(
-    f => f.startsWith("bundle.") && f.endsWith(".js") && !f.endsWith(".map")
+    f => f.startsWith("bundle.") && f.endsWith(".js") && !f.endsWith(".map") && f !== "bundle.js"
   );
   const cssFiles = readdirSync(cssDir).filter(
-    f => f.startsWith("bundle.") && f.endsWith(".css")
+    f => f.startsWith("bundle.") && f.endsWith(".css") && f !== "bundle.css"
   );
-  
+
   return {
     js: jsFiles.length > 0 ? jsFiles[0] : null,
     css: cssFiles.length > 0 ? cssFiles[0] : null,
@@ -27,13 +45,13 @@ function findBundleFiles(docsDir: string): BundleFiles {
 
 function updateHtmlFiles(docsDir: string, bundles: BundleFiles): void {
   const htmlFiles = readdirSync(docsDir).filter(f => f.endsWith(".html"));
-  
+
   for (const htmlFile of htmlFiles) {
     const filePath = join(docsDir, htmlFile);
     let content = readFileSync(filePath, "utf-8");
-    
+
     let updated = false;
-    
+
     if (bundles.js) {
       const jsPattern = /\/statics\/js\/bundle(?:\.[a-z0-9]+)?\.js/g;
       if (jsPattern.test(content)) {
@@ -41,7 +59,7 @@ function updateHtmlFiles(docsDir: string, bundles: BundleFiles): void {
         updated = true;
       }
     }
-    
+
     if (bundles.css) {
       const cssPattern = /\/statics\/css\/bundle(?:\.[a-z0-9]+)?\.css/g;
       if (cssPattern.test(content)) {
@@ -49,7 +67,7 @@ function updateHtmlFiles(docsDir: string, bundles: BundleFiles): void {
         updated = true;
       }
     }
-    
+
     if (updated) {
       writeFileSync(filePath, content, "utf-8");
       console.log(`✓ Updated ${htmlFile}`);
@@ -59,6 +77,8 @@ function updateHtmlFiles(docsDir: string, bundles: BundleFiles): void {
 
 const docsDir = process.argv[2] || join(import.meta.dir, "..", "docs");
 console.log(`Versioning static files in ${docsDir}...`);
+
+cleanupOldBundles(docsDir);
 
 const bundles = findBundleFiles(docsDir);
 console.log(`Found bundles:`, bundles);

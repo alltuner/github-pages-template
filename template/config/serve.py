@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-from __future__ import annotations
+#!/usr/bin/env python
 
 import argparse
 import os
@@ -30,6 +29,25 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+class NoCacheMiddleware:
+    """WSGI middleware to add no-cache headers for bundle files"""
+
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        def custom_start_response(status, headers, exc_info=None):
+            path = environ.get('PATH_INFO', '')
+            if '/statics/js/bundle.' in path or '/statics/css/bundle.' in path:
+                headers = list(headers)
+                headers.append(('Cache-Control', 'no-cache, no-store, must-revalidate'))
+                headers.append(('Pragma', 'no-cache'))
+                headers.append(('Expires', '0'))
+            return start_response(status, headers, exc_info)
+
+        return self.app(environ, custom_start_response)
+
+
 def main() -> None:
     args = parse_args()
     root = Path(args.root).resolve()
@@ -37,21 +55,8 @@ def main() -> None:
         raise SystemExit(f"Serve root {root} is not a directory")
 
     server = Server()
-    
-    # Monkey-patch to add Cache-Control headers for bundle files in dev
-    from livereload.handlers import LiveReloadHandler
-    original_end_headers = LiveReloadHandler.end_headers
-    
-    def custom_end_headers(self):
-        # Add no-cache headers for bundle files to prevent dev caching issues
-        if '/statics/js/bundle.' in self.path or '/statics/css/bundle.' in self.path:
-            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
-            self.send_header('Pragma', 'no-cache')
-            self.send_header('Expires', '0')
-        original_end_headers(self)
-    
-    LiveReloadHandler.end_headers = custom_end_headers
-    
+    server.application = NoCacheMiddleware(server.application)
+
     server.watch(str(root / "*.html"))
     server.watch(str(root / "statics" / "**" / "*.*"), delay=0.1)
     server.watch(str(root / "**" / "*.xml"), delay=0.5)
