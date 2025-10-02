@@ -6,11 +6,11 @@
     "prototuner": "github:alltuner/prototuner"
   },
   "scripts": {
-    "build:css": "bun tailwindcss -i config/config.css --minify -o docs/statics/css/bundle.css",
-    "build:js": "bun build config/config.js --minify --outdir=docs/statics/js --entry-naming='bundle.[ext]'",
+    "build:css": "bun tailwindcss -i config/config.css --minify -o docs/statics/css/bundle.css && bun run config/hash-css.ts",
+    "build:js": "bun build config/config.js --minify --outdir=docs/statics/js --entry-naming='bundle.[hash].[ext]'",
     "build": "bun run build:css && bun run build:js && bun run version-statics",
     "purge-cf": "uv run --with python-cloudflare config/purge-cf.py",
-    "version-statics": "uv run --with beautifulsoup4,typer config/version-statics.py docs",
+    "version-statics": "bun run config/version-statics.ts docs",
     "dev:css": "bun tailwindcss -w -i config/config.css -o docs/statics/css/bundle.css",
     "dev:js": "bun build config/config.js --watch --outdir=docs/statics/js --entry-naming='bundle.[ext]' --sourcemap",
     "serve": "uv run --with livereload config/serve.py --host 0.0.0.0",

@@ -37,6 +37,21 @@ def main() -> None:
         raise SystemExit(f"Serve root {root} is not a directory")
 
     server = Server()
+    
+    # Monkey-patch to add Cache-Control headers for bundle files in dev
+    from livereload.handlers import LiveReloadHandler
+    original_end_headers = LiveReloadHandler.end_headers
+    
+    def custom_end_headers(self):
+        # Add no-cache headers for bundle files to prevent dev caching issues
+        if '/statics/js/bundle.' in self.path or '/statics/css/bundle.' in self.path:
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
+        original_end_headers(self)
+    
+    LiveReloadHandler.end_headers = custom_end_headers
+    
     server.watch(str(root / "*.html"))
     server.watch(str(root / "statics" / "**" / "*.*"), delay=0.1)
     server.watch(str(root / "**" / "*.xml"), delay=0.5)
