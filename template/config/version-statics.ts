@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { readdirSync, readFileSync, writeFileSync, unlinkSync, existsSync } from "fs";
-import { join } from "path";
+import { join, relative } from "path";
 
 interface BundleFiles {
   js: string | null;
@@ -43,11 +43,30 @@ function findBundleFiles(docsDir: string): BundleFiles {
   };
 }
 
-function updateHtmlFiles(docsDir: string, bundles: BundleFiles): void {
-  const htmlFiles = readdirSync(docsDir).filter(f => f.endsWith(".html"));
+function collectHtmlFiles(rootDir: string, currentDir: string = rootDir): string[] {
+  const entries = readdirSync(currentDir, { withFileTypes: true });
+  const files: string[] = [];
 
-  for (const htmlFile of htmlFiles) {
-    const filePath = join(docsDir, htmlFile);
+  for (const entry of entries) {
+    const entryPath = join(currentDir, entry.name);
+
+    if (entry.isDirectory()) {
+      files.push(...collectHtmlFiles(rootDir, entryPath));
+      continue;
+    }
+
+    if (entry.isFile() && entry.name.endsWith(".html")) {
+      files.push(entryPath);
+    }
+  }
+
+  return files;
+}
+
+function updateHtmlFiles(docsDir: string, bundles: BundleFiles): void {
+  const htmlFiles = collectHtmlFiles(docsDir);
+
+  for (const filePath of htmlFiles) {
     let content = readFileSync(filePath, "utf-8");
 
     let updated = false;
@@ -70,7 +89,8 @@ function updateHtmlFiles(docsDir: string, bundles: BundleFiles): void {
 
     if (updated) {
       writeFileSync(filePath, content, "utf-8");
-      console.log(`✓ Updated ${htmlFile}`);
+      const relativePath = relative(docsDir, filePath) || "index.html";
+      console.log(`✓ Updated ${relativePath}`);
     }
   }
 }
