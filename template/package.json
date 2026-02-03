@@ -3,7 +3,7 @@
     "@lucide/lab": "^0.1.2",
     "@tailwindcss/typography": "^0.5.19",
     "lucide": "^0.555.0",
-    "@alltuner/vibetuner": "^2.21.0"
+    "@alltuner/vibetuner": "^6.0.0"
   },
   "scripts": {
     "build:css": "bun tailwindcss -i config/config.css --minify -o docs/statics/css/bundle.css && bun run config/hash-css.ts",
